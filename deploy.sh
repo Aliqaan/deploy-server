@@ -12,24 +12,23 @@ echo "architecture: $architecture"
 
 # Login to OpenFaaS
 echo "Logging in to OpenFaaS..."
-echo $password | faas-cli login -g $gateway --password-stdin
+echo $password | sudo faas-cli login -g $gateway --password-stdin
 
 # Directory for functions and yml file
 # Change it in the deployed server
-cd /Users/alikaanbiber/Desktop/functions
+cd /home/ubuntu/functions
 
 # Create new function
 echo "Creating new function '$function_name'..."
-faas-cli new $function_name --lang python3
-
+sudo faas-cli new $function_name --lang python3
 
 # Copy function code to function directory
 echo "Copying function code to '$function_name' directory..."
-echo "$function_code" > ./$function_name/handler.py
+echo "$function_code" | sudo tee ./$function_name/handler.py > /dev/null
 
 # Modify the yml file with image name
 echo "Writing yml file"
-cat <<EOF >${function_name}.yml
+cat <<EOF | sudo tee ${function_name}.yml > /dev/null
 version: 1.0
 provider:
   name: openfaas
@@ -43,8 +42,8 @@ EOF
 
 # Publish function Docker image to registry
 echo "Publishing Docker image for '$function_name'..."
-faas-cli publish -f $function_name.yml --platforms $architecture
+sudo faas-cli publish -f $function_name.yml --platforms $architecture
 
 # Deploy Function to Faasd
 echo "Deploying '$function_name' to Faasd..."
-faas-cli deploy -f $function_name.yml
+sudo faas-cli deploy -f $function_name.yml
